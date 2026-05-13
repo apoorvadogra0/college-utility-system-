@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Utility System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>🎓 College Utility System</h1>
+            </div>
+            <nav class="navbar-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
+                <a href="#courses" class="nav-link" data-section="courses">Courses</a>
+                <a href="#attendance" class="nav-link" data-section="attendance">Attendance</a>
+                <a href="#grades" class="nav-link" data-section="grades">Grades</a>
+                <a href="#notices" class="nav-link" data-section="notices">Notices</a>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+        <!-- Authentication Section -->
+        <section id="auth-section" class="section auth-section active">
+            <div class="auth-card">
+                <h2>College Utility System</h2>
+                <p class="auth-subtitle">Login to your account</p>
+                
+                <form id="authForm" class="auth-form">
+                    <div class="form-group">
+                        <input type="email" id="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <select id="role" class="form-select">
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+
+                <div class="demo-accounts">
+                    <h3>Demo Accounts:</h3>
+                    <p><strong>Student:</strong> student@college.com / password123</p>
+                    <p><strong>Faculty:</strong> faculty@college.com / password123</p>
+                    <p><strong>Admin:</strong> admin@college.com / password123</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section dashboard-section">
+            <h2>Dashboard</h2>
+            <div class="user-info">
+                <h3>Welcome, <span id="userName">User</span>!</h3>
+                <p id="userRole" class="user-role">Role: Student</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Enrolled Courses</h3>
+                    <p class="stat-number" id="courseStat">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Attendance %</h3>
+                    <p class="stat-number" id="attendanceStat">0%</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Current GPA</h3>
+                    <p class="stat-number" id="gpaStat">0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Notices</h3>
+                    <p class="stat-number" id="noticesStat">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Courses Section -->
+        <section id="courses" class="section courses-section">
+            <h2>My Courses</h2>
+            <div id="coursesList" class="courses-grid">
+                <p class="loading">Loading courses...</p>
+            </div>
+        </section>
+
+        <!-- Attendance Section -->
+        <section id="attendance" class="section attendance-section">
+            <h2>Attendance Records</h2>
+            <div class="filters">
+                <select id="courseFilter" class="form-select">
+                    <option value="">All Courses</option>
+                </select>
+            </div>
+            <div id="attendanceList" class="attendance-table">
+                <p class="loading">Loading attendance records...</p>
+            </div>
+        </section>
+
+        <!-- Grades Section -->
+        <section id="grades" class="section grades-section">
+            <h2>Grade Report</h2>
+            <div class="filters">
+                <select id="gradeFilter" class="form-select">
+                    <option value="">All Courses</option>
+                </select>
+            </div>
+            <div id="gradesList" class="grades-table">
+                <p class="loading">Loading grades...</p>
+            </div>
+        </section>
+
+        <!-- Notices Section -->
+        <section id="notices" class="section notices-section">
+            <h2>Notice Board</h2>
+            <div class="filters">
+                <select id="noticeFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    <option value="academic">Academic</option>
+                    <option value="event">Event</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="holiday">Holiday</option>
+                </select>
+            </div>
+            <div id="noticesList" class="notices-container">
+                <p class="loading">Loading notices...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 College Utility System. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
