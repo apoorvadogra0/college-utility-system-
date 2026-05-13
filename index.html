@@ -7,141 +7,107 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Navigation Header -->
-    <header class="navbar">
-        <div class="navbar-container">
-            <div class="navbar-brand">
-                <h1>🎓 College Utility System</h1>
-            </div>
-            <nav class="navbar-menu">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a>
-                <a href="#courses" class="nav-link" data-section="courses">Courses</a>
-                <a href="#attendance" class="nav-link" data-section="attendance">Attendance</a>
-                <a href="#grades" class="nav-link" data-section="grades">Grades</a>
-                <a href="#notices" class="nav-link" data-section="notices">Notices</a>
-                <button id="logoutBtn" class="btn-logout">Logout</button>
-            </nav>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 College Utility System</div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showSection('courses')">Courses</a></li>
+                <li><a href="#" onclick="showSection('attendance')">Attendance</a></li>
+                <li><a href="#" onclick="showSection('grades')">Grades</a></li>
+                <li><a href="#" onclick="showSection('notices')">Notices</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Container -->
-    <main class="container">
-        <!-- Authentication Section -->
-        <section id="auth-section" class="section auth-section active">
-            <div class="auth-card">
-                <h2>College Utility System</h2>
-                <p class="auth-subtitle">Login to your account</p>
-                
-                <form id="authForm" class="auth-form">
-                    <div class="form-group">
-                        <input type="email" id="email" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="password" placeholder="Password" required>
-                    </div>
-                    <div class="form-group">
-                        <select id="role" class="form-select">
-                            <option value="student">Student</option>
-                            <option value="faculty">Faculty</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-primary">Login</button>
-                </form>
-
-                <div class="demo-accounts">
-                    <h3>Demo Accounts:</h3>
-                    <p><strong>Student:</strong> student@college.com / password123</p>
-                    <p><strong>Faculty:</strong> faculty@college.com / password123</p>
-                    <p><strong>Admin:</strong> admin@college.com / password123</p>
-                </div>
+    <!-- Auth Section -->
+    <div id="authSection" class="auth-container">
+        <div class="auth-box">
+            <h1>College Utility System</h1>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
             </div>
-        </section>
 
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Student Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button onclick="login()">Login</button>
+                <p id="loginError" class="error-message"></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <h2>Student Registration</h2>
+                <input type="text" id="registerName" placeholder="Full Name" required>
+                <input type="email" id="registerEmail" placeholder="Email" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <input type="text" id="registerRoll" placeholder="Roll Number" required>
+                <select id="registerDept" required>
+                    <option value="">Select Department</option>
+                    <option value="CSE">Computer Science</option>
+                    <option value="ECE">Electronics</option>
+                    <option value="ME">Mechanical</option>
+                    <option value="CE">Civil</option>
+                </select>
+                <button onclick="register()">Register</button>
+                <p id="registerError" class="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-content" style="display: none;">
         <!-- Dashboard Section -->
-        <section id="dashboard" class="section dashboard-section">
+        <section id="dashboardSection" class="section active">
             <h2>Dashboard</h2>
-            <div class="user-info">
-                <h3>Welcome, <span id="userName">User</span>!</h3>
-                <p id="userRole" class="user-role">Role: Student</p>
-            </div>
-
-            <div class="stats-grid">
+            <div class="stats-container">
                 <div class="stat-card">
-                    <h3>Enrolled Courses</h3>
-                    <p class="stat-number" id="courseStat">0</p>
+                    <h3>Total Courses</h3>
+                    <p class="stat-number" id="totalCourses">0</p>
                 </div>
                 <div class="stat-card">
-                    <h3>Attendance %</h3>
-                    <p class="stat-number" id="attendanceStat">0%</p>
+                    <h3>Attendance</h3>
+                    <p class="stat-number" id="avgAttendance">0%</p>
                 </div>
                 <div class="stat-card">
                     <h3>Current GPA</h3>
-                    <p class="stat-number" id="gpaStat">0.00</p>
+                    <p class="stat-number" id="currentGPA">0.0</p>
                 </div>
                 <div class="stat-card">
                     <h3>Notices</h3>
-                    <p class="stat-number" id="noticesStat">0</p>
+                    <p class="stat-number" id="totalNotices">0</p>
                 </div>
             </div>
         </section>
 
         <!-- Courses Section -->
-        <section id="courses" class="section courses-section">
+        <section id="coursesSection" class="section">
             <h2>My Courses</h2>
-            <div id="coursesList" class="courses-grid">
-                <p class="loading">Loading courses...</p>
-            </div>
+            <div id="coursesList" class="courses-container"></div>
         </section>
 
         <!-- Attendance Section -->
-        <section id="attendance" class="section attendance-section">
-            <h2>Attendance Records</h2>
-            <div class="filters">
-                <select id="courseFilter" class="form-select">
-                    <option value="">All Courses</option>
-                </select>
-            </div>
-            <div id="attendanceList" class="attendance-table">
-                <p class="loading">Loading attendance records...</p>
-            </div>
+        <section id="attendanceSection" class="section">
+            <h2>Attendance</h2>
+            <div id="attendanceList" class="attendance-container"></div>
         </section>
 
         <!-- Grades Section -->
-        <section id="grades" class="section grades-section">
-            <h2>Grade Report</h2>
-            <div class="filters">
-                <select id="gradeFilter" class="form-select">
-                    <option value="">All Courses</option>
-                </select>
-            </div>
-            <div id="gradesList" class="grades-table">
-                <p class="loading">Loading grades...</p>
-            </div>
+        <section id="gradesSection" class="section">
+            <h2>My Grades</h2>
+            <div id="gradesList" class="grades-container"></div>
         </section>
 
         <!-- Notices Section -->
-        <section id="notices" class="section notices-section">
-            <h2>Notice Board</h2>
-            <div class="filters">
-                <select id="noticeFilter" class="form-select">
-                    <option value="">All Categories</option>
-                    <option value="academic">Academic</option>
-                    <option value="event">Event</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="holiday">Holiday</option>
-                </select>
-            </div>
-            <div id="noticesList" class="notices-container">
-                <p class="loading">Loading notices...</p>
-            </div>
+        <section id="noticesSection" class="section">
+            <h2>College Notices</h2>
+            <div id="noticesList" class="notices-container"></div>
         </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 College Utility System. All rights reserved.</p>
-    </footer>
+    </div>
 
     <script src="app.js"></script>
 </body>
