@@ -6,16 +6,16 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   background: linear-gradient(135deg, #fff9c4 0%, #ffe082 100%);
+    background: linear-gradient(135deg, #fffde7 0%, #ffe082 100%);
     min-height: 100vh;
-    color: #333;
+    color: #5d4037;
 }
 
 /* Navbar */
 .navbar {
-     background: linear-gradient(135deg, #fff9c4, #ffe082);
+    background: linear-gradient(135deg, #fff9c4, #ffd54f);
     padding: 1rem 0;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     position: sticky;
     top: 0;
     z-index: 100;
@@ -31,8 +31,8 @@ body {
 }
 
 .logo {
-    color: white;
-    font-size: 1.5rem;
+    color: #6d4c41;
+    font-size: 1.7rem;
     font-weight: bold;
 }
 
@@ -43,13 +43,14 @@ body {
 }
 
 .nav-menu a {
-    color: white;
+    color: #6d4c41;
     text-decoration: none;
-    transition: opacity 0.3s;
+    font-weight: 600;
+    transition: 0.3s;
 }
 
 .nav-menu a:hover {
-    opacity: 0.8;
+    color: #f57f17;
 }
 
 /* Auth Container */
@@ -62,19 +63,20 @@ body {
 }
 
 .auth-box {
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
     padding: 3rem;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
+    backdrop-filter: blur(10px);
 }
 
 .auth-box h1 {
     text-align: center;
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 2rem;
-    font-size: 2rem;
+    font-size: 2.2rem;
 }
 
 .auth-tabs {
@@ -85,18 +87,18 @@ body {
 
 .auth-tab {
     flex: 1;
-    padding: 0.75rem;
+    padding: 0.8rem;
     border: none;
-    background: #f0f0f0;
+    background: #fff8e1;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 10px;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: 0.3s;
 }
 
 .auth-tab.active {
-    background: #667eea;
-    color: white;
+    background: linear-gradient(135deg, #ffd54f, #ffca28);
+    color: #5d4037;
 }
 
 .auth-form {
@@ -108,7 +110,7 @@ body {
 }
 
 .auth-form h2 {
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
 }
@@ -116,32 +118,34 @@ body {
 .auth-form input,
 .auth-form select {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.9rem;
     margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #ffe082;
+    border-radius: 10px;
     font-size: 1rem;
+    background: #fffdf5;
 }
 
 .auth-form button {
     width: 100%;
-    padding: 0.75rem;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    padding: 0.9rem;
+    background: linear-gradient(135deg, #ffd54f, #fbc02d);
+    color: #5d4037;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: 0.3s;
 }
 
 .auth-form button:hover {
-    transform: scale(1.02);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
 }
 
 .error-message {
-    color: #e74c3c;
+    color: #d84315;
     margin-top: 1rem;
     text-align: center;
 }
@@ -155,10 +159,10 @@ body {
 
 .section {
     display: none;
-    background: white;
+    background: rgba(255, 255, 255, 0.92);
     padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
     animation: slideIn 0.3s ease;
 }
 
@@ -178,40 +182,38 @@ body {
 }
 
 .section h2 {
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 2rem;
     font-size: 2rem;
 }
 
-/* Stats Container */
+/* Dashboard Cards */
 .stats-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
 }
 
 .stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #fff8e1, #ffe082);
+    color: #6d4c41;
     padding: 2rem;
-    border-radius: 10px;
+    border-radius: 18px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 20px rgba(255, 193, 7, 0.2);
 }
 
 .stat-card h3 {
-    font-size: 0.9rem;
     margin-bottom: 1rem;
-    opacity: 0.9;
+    font-size: 1rem;
 }
 
 .stat-number {
-    font-size: 2.5rem;
+    font-size: 2.7rem;
     font-weight: bold;
 }
 
-/* Courses Container */
+/* Courses */
 .courses-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -219,51 +221,50 @@ body {
 }
 
 .course-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: #fffdf5;
+    border: 1px solid #ffe082;
+    border-radius: 15px;
     padding: 1.5rem;
-    background: #f9f9f9;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: 0.3s;
 }
 
 .course-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(255, 193, 7, 0.2);
 }
 
 .course-card h3 {
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 0.5rem;
 }
 
 .course-card p {
-    color: #666;
+    color: #6d4c41;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
 }
 
-/* Attendance Container */
+/* Attendance */
 .attendance-container {
     display: grid;
     gap: 1rem;
 }
 
 .attendance-item {
-    border-left: 4px solid #667eea;
-    padding: 1rem;
-    background: #f9f9f9;
-    border-radius: 5px;
+    background: #fffdf5;
+    border-left: 5px solid #fbc02d;
+    padding: 1.2rem;
+    border-radius: 12px;
 }
 
 .attendance-item h3 {
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 0.5rem;
 }
 
 .attendance-bar {
     width: 100%;
-    height: 20px;
-    background: #e0e0e0;
+    height: 18px;
+    background: #f5f5f5;
     border-radius: 10px;
     overflow: hidden;
     margin-top: 0.5rem;
@@ -271,25 +272,24 @@ body {
 
 .attendance-fill {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    transition: width 0.3s;
+    background: linear-gradient(90deg, #ffd54f, #f9a825);
 }
 
-/* Grades Container */
+/* Grades */
 .grades-container {
     display: grid;
     gap: 1.5rem;
 }
 
 .grade-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: #fffdf5;
+    border: 1px solid #ffe082;
+    border-radius: 15px;
     padding: 1.5rem;
-    background: #f9f9f9;
 }
 
 .grade-card h3 {
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 1rem;
 }
 
@@ -297,56 +297,56 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    margin-bottom: 0.5rem;
 }
 
 .grade-field {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 0;
+    padding: 0.7rem 0;
     border-bottom: 1px solid #eee;
 }
 
 .grade-label {
-    color: #666;
+    color: #6d4c41;
 }
 
 .grade-value {
     font-weight: bold;
-    color: #667eea;
+    color: #f57f17;
 }
 
-/* Notices Container */
+/* Notices */
 .notices-container {
     display: grid;
     gap: 1.5rem;
 }
 
 .notice-card {
-    border-left: 4px solid #764ba2;
+    background: #fffdf5;
+    border-left: 5px solid #ffca28;
     padding: 1.5rem;
-    background: #f9f9f9;
-    border-radius: 5px;
+    border-radius: 12px;
 }
 
 .notice-card h3 {
-    color: #667eea;
+    color: #f9a825;
     margin-bottom: 0.5rem;
 }
 
 .notice-date {
-    color: #999;
-    font-size: 0.85rem;
+    color: #8d6e63;
+    font-size: 0.9rem;
     margin-bottom: 0.5rem;
 }
 
 .notice-content {
-    color: #555;
+    color: #5d4037;
     line-height: 1.6;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
+
     .nav-container {
         flex-direction: column;
         gap: 1rem;
@@ -355,11 +355,6 @@ body {
     .nav-menu {
         flex-wrap: wrap;
         justify-content: center;
-        gap: 1rem;
-    }
-
-    .auth-box {
-        padding: 2rem;
     }
 
     .stats-container {
@@ -376,23 +371,16 @@ body {
 }
 
 @media (max-width: 480px) {
-    .section {
-        padding: 1rem;
-    }
-
-    .section h2 {
-        font-size: 1.5rem;
-    }
 
     .stats-container {
         grid-template-columns: 1fr;
     }
 
-    .logo {
-        font-size: 1.2rem;
+    .auth-box {
+        padding: 2rem;
     }
 
-    .nav-menu a {
-        font-size: 0.9rem;
+    .section {
+        padding: 1rem;
     }
 }
