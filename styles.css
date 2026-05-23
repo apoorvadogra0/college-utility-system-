@@ -5,37 +5,37 @@
 }
 
 :root {
-    --primary-blue: #1a3a70;
-    --secondary-blue: #2d5a9d;
-    --accent-blue: #4a7bc6;
-    --light-blue: #e8f0ff;
-    --dark-gray: #2c3e50;
-    --medium-gray: #5a6c7d;
+    --primary-orange: #FF8C00;
+    --secondary-orange: #FFA500;
+    --accent-orange: #FFB84D;
+    --light-orange: #FFF5E6;
+    --dark-black: #1a1a1a;
+    --medium-black: #333333;
     --light-gray: #f5f6f9;
-    --border-color: #d1d9e6;
+    --border-color: #e8e8e8;
     --success-color: #27ae60;
     --warning-color: #e74c3c;
-    --shadow: 0 2px 12px rgba(26, 58, 112, 0.1);
-    --shadow-lg: 0 8px 24px rgba(26, 58, 112, 0.15);
+    --shadow: 0 2px 12px rgba(255, 140, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(255, 140, 0, 0.2);
 }
 
 body {
     font-family: 'Segoe UI', 'Arial', sans-serif;
-    background: linear-gradient(135deg, #f5f6f9 0%, #e8f0ff 100%);
+    background: linear-gradient(135deg, #f5f6f9 0%, #fff9f0 100%);
     min-height: 100vh;
-    color: var(--dark-gray);
+    color: var(--medium-black);
     line-height: 1.6;
 }
 
 /* ===== NAVBAR ===== */
 .navbar {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    background: linear-gradient(135deg, var(--dark-black) 0%, #2a2a2a 100%);
     padding: 0.8rem 0;
     box-shadow: var(--shadow-lg);
     position: sticky;
     top: 0;
     z-index: 100;
-    border-bottom: 3px solid var(--accent-blue);
+    border-bottom: 3px solid var(--primary-orange);
 }
 
 .nav-container {
@@ -59,7 +59,7 @@ body {
 
 .logo::before {
     content: '▲';
-    color: var(--accent-blue);
+    color: var(--primary-orange);
     font-size: 2rem;
 }
 
@@ -86,7 +86,7 @@ body {
     height: 2px;
     bottom: 0;
     left: 0;
-    background-color: var(--accent-blue);
+    background-color: var(--primary-orange);
     transition: width 0.3s ease;
 }
 
@@ -101,7 +101,7 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 2rem;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    background: linear-gradient(135deg, var(--dark-black) 0%, #2a2a2a 100%);
 }
 
 .auth-box {
@@ -112,12 +112,12 @@ body {
     width: 100%;
     max-width: 420px;
     backdrop-filter: blur(10px);
-    border-top: 5px solid var(--accent-blue);
+    border-top: 5px solid var(--primary-orange);
 }
 
 .auth-box h1 {
     text-align: center;
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 0.5rem;
     font-size: 2rem;
     font-weight: 700;
@@ -125,7 +125,7 @@ body {
 
 .auth-box p {
     text-align: center;
-    color: var(--medium-gray);
+    color: var(--medium-black);
     margin-bottom: 2rem;
     font-size: 0.95rem;
 }
@@ -146,14 +146,14 @@ body {
     border-radius: 0;
     font-weight: 600;
     transition: all 0.3s ease;
-    color: var(--medium-gray);
+    color: var(--medium-black);
     border-bottom: 3px solid transparent;
     font-size: 0.95rem;
 }
 
 .auth-tab.active {
-    color: var(--primary-blue);
-    border-bottom-color: var(--accent-blue);
+    color: var(--primary-orange);
+    border-bottom-color: var(--primary-orange);
 }
 
 .auth-form {
@@ -165,7 +165,7 @@ body {
 }
 
 .auth-form h2 {
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 1.5rem;
     font-size: 1.3rem;
     font-weight: 600;
@@ -180,7 +180,7 @@ body {
     border-radius: 8px;
     font-size: 0.95rem;
     background: #ffffff;
-    color: var(--dark-gray);
+    color: var(--medium-black);
     transition: all 0.3s ease;
     font-family: 'Segoe UI', sans-serif;
 }
@@ -188,18 +188,18 @@ body {
 .auth-form input:focus,
 .auth-form select:focus {
     outline: none;
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 3px rgba(74, 123, 198, 0.1);
+    border-color: var(--primary-orange);
+    box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
 }
 
 .auth-form input::placeholder {
-    color: var(--medium-gray);
+    color: var(--medium-black);
 }
 
 .auth-form button {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(135deg, var(--secondary-blue), var(--accent-blue));
+    background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -213,7 +213,7 @@ body {
 
 .auth-form button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(26, 58, 112, 0.3);
+    box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
 }
 
 .auth-form button:active {
@@ -244,7 +244,7 @@ body {
     border-radius: 12px;
     box-shadow: var(--shadow);
     animation: slideIn 0.3s ease;
-    border-left: 5px solid var(--accent-blue);
+    border-left: 5px solid var(--primary-orange);
 }
 
 .section.active {
@@ -263,7 +263,7 @@ body {
 }
 
 .section h2 {
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 2rem;
     font-size: 1.8rem;
     font-weight: 700;
@@ -276,7 +276,7 @@ body {
     position: absolute;
     width: 50px;
     height: 3px;
-    background: var(--accent-blue);
+    background: var(--primary-orange);
     bottom: 0;
     left: 0;
 }
@@ -290,14 +290,14 @@ body {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+    background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-orange) 100%);
     color: #ffffff;
     padding: 2rem;
     border-radius: 12px;
     text-align: center;
     box-shadow: var(--shadow);
     transition: all 0.3s ease;
-    border-top: 4px solid var(--accent-blue);
+    border-top: 4px solid var(--dark-black);
 }
 
 .stat-card:hover {
@@ -329,7 +329,7 @@ body {
 .course-card {
     background: #ffffff;
     border: 1.5px solid var(--border-color);
-    border-left: 5px solid var(--accent-blue);
+    border-left: 5px solid var(--primary-orange);
     border-radius: 10px;
     padding: 1.5rem;
     transition: all 0.3s ease;
@@ -338,26 +338,26 @@ body {
 .course-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--accent-blue);
+    border-color: var(--primary-orange);
 }
 
 .course-card h3 {
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 0.5rem;
     font-weight: 700;
     font-size: 1.1rem;
 }
 
 .course-card p {
-    color: var(--medium-gray);
+    color: var(--medium-black);
     margin-bottom: 0.5rem;
     font-size: 0.95rem;
 }
 
 .course-card .course-code {
     display: inline-block;
-    background: var(--light-blue);
-    color: var(--primary-blue);
+    background: var(--light-orange);
+    color: var(--dark-black);
     padding: 0.3rem 0.8rem;
     border-radius: 6px;
     font-size: 0.85rem;
@@ -373,7 +373,7 @@ body {
 
 .attendance-item {
     background: #ffffff;
-    border-left: 5px solid var(--accent-blue);
+    border-left: 5px solid var(--primary-orange);
     padding: 1.5rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
@@ -385,13 +385,13 @@ body {
 }
 
 .attendance-item h3 {
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 0.5rem;
     font-weight: 700;
 }
 
 .attendance-item p {
-    color: var(--medium-gray);
+    color: var(--medium-black);
     font-size: 0.9rem;
     margin-bottom: 1rem;
 }
@@ -408,14 +408,14 @@ body {
 
 .attendance-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--secondary-blue), var(--accent-blue));
+    background: linear-gradient(90deg, var(--primary-orange), var(--secondary-orange));
     border-radius: 12px;
     transition: width 0.3s ease;
 }
 
 .attendance-percentage {
     float: right;
-    color: var(--medium-gray);
+    color: var(--medium-black);
     font-weight: 600;
     font-size: 0.85rem;
     margin-top: -1.8rem;
@@ -442,11 +442,11 @@ body {
 }
 
 .grade-card h3 {
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 1.5rem;
     font-weight: 700;
     font-size: 1.1rem;
-    border-bottom: 2px solid var(--light-blue);
+    border-bottom: 2px solid var(--light-orange);
     padding-bottom: 0.8rem;
 }
 
@@ -466,18 +466,18 @@ body {
 }
 
 .grade-field:hover {
-    background: var(--light-blue);
+    background: var(--light-orange);
 }
 
 .grade-label {
-    color: var(--medium-gray);
+    color: var(--medium-black);
     font-weight: 600;
     font-size: 0.9rem;
 }
 
 .grade-value {
     font-weight: 700;
-    color: var(--primary-blue);
+    color: var(--dark-black);
     font-size: 1rem;
 }
 
@@ -497,7 +497,7 @@ body {
 
 .notice-card {
     background: #ffffff;
-    border-left: 5px solid var(--accent-blue);
+    border-left: 5px solid var(--primary-orange);
     padding: 1.5rem;
     border-radius: 10px;
     border: 1px solid var(--border-color);
@@ -510,14 +510,14 @@ body {
 }
 
 .notice-card h3 {
-    color: var(--primary-blue);
+    color: var(--dark-black);
     margin-bottom: 0.5rem;
     font-weight: 700;
     font-size: 1.1rem;
 }
 
 .notice-date {
-    color: var(--medium-gray);
+    color: var(--medium-black);
     font-size: 0.85rem;
     margin-bottom: 0.8rem;
     display: flex;
@@ -531,7 +531,7 @@ body {
 }
 
 .notice-content {
-    color: var(--dark-gray);
+    color: var(--medium-black);
     line-height: 1.7;
     font-size: 0.95rem;
 }
@@ -540,7 +540,7 @@ body {
 .btn {
     display: inline-block;
     padding: 0.8rem 1.5rem;
-    background: linear-gradient(135deg, var(--secondary-blue), var(--accent-blue));
+    background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -557,8 +557,8 @@ body {
 }
 
 .btn-secondary {
-    background: var(--light-blue);
-    color: var(--primary-blue);
+    background: var(--light-orange);
+    color: var(--dark-black);
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -635,7 +635,7 @@ body {
 
 /* ===== ACCESSIBILITY ===== */
 :focus-visible {
-    outline: 2px solid var(--accent-blue);
+    outline: 2px solid var(--primary-orange);
     outline-offset: 2px;
 }
 
