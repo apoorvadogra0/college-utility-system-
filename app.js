@@ -1,316 +1,304 @@
-// API Base URL
-const API_URL = 'http://localhost:3000/api';
+const express = require('express');
+const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const path = require('path');
 
-// Current user
-let currentUser = null;
+dotenv.config();
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        currentUser = JSON.parse(localStorage.getItem('user'));
-        showMainContent();
-        loadDashboard();
+const app = express();
+const PORT = process.env.PORT || 5000; // ✅ Port fix (default 5000)
+
+// ==================== MIDDLEWARE ====================
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public'))); // ✅ Static path fix
+
+// ==================== MYSQL CONNECTION ====================
+
+const pool = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'college_utility',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// ==================== JWT SECRET ====================
+
+const JWT_SECRET =
+    process.env.JWT_SECRET ||
+    'your_super_secret_jwt_key';
+
+// ==================== VERIFY TOKEN ====================
+
+const verifyToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.userId = decoded.userId;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+// ==================== HOME ROUTE ====================
+
+app.get('/', (req, res) => {
+    res.send('🎓 College Utility System API Running...');
+});
+
+// ==================== AUTH ROUTES ====================
+
+// REGISTER
+app.post('/api/auth/register', async (req, res) => {
+    const { name, email, password, rollNumber, department } = req.body;
+
+    if (!name || !email || !password || !rollNumber || !department) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    try {
+        const connection = await pool.getConnection();
+
+        const [existingUser] = await connection.query(
+            'SELECT * FROM users WHERE email = ?',
+            [email]
+        );
+
+        if (existingUser.length > 0) {
+            connection.release();
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const [userResult] = await connection.query(
+            `INSERT INTO users (name,email,password,role) VALUES (?,?,?,?)`,
+            [name, email, hashedPassword, 'student']
+        );
+
+        const userId = userResult.insertId;
+
+        await connection.query(
+            `INSERT INTO students (user_id,roll_number,department,semester) VALUES (?,?,?,?)`,
+            [userId, rollNumber, department, 1]
+        );
+
+        connection.release();
+
+        const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+
+        res.status(201).json({
+            message: 'Registration successful',
+            token,
+            user: { id: userId, name, email, role: 'student' }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
-// Auth Functions
-function switchAuthTab(tab) {
-    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(tab + 'Form').classList.add('active');
-    
-    // Clear error messages
-    document.getElementById(tab + 'Error').textContent = '';
-}
+// LOGIN
+app.post('/api/auth/login', async (req, res) => {
+    const { email, password } = req.body;
 
-async function login() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const errorEl = document.getElementById('loginError');
-    
     if (!email || !password) {
-        errorEl.textContent = 'Please fill all fields';
-        return;
+        return res.status(400).json({ message: 'Email and password required' });
     }
-    
-    try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            currentUser = data.user;
-            showMainContent();
-            loadDashboard();
-        } else {
-            errorEl.textContent = data.message || 'Login failed';
-        }
-    } catch (error) {
-        errorEl.textContent = 'Error connecting to server';
-        console.error(error);
-    }
-}
 
-async function register() {
-    const name = document.getElementById('registerName').value;
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-    const rollNumber = document.getElementById('registerRoll').value;
-    const department = document.getElementById('registerDept').value;
-    const errorEl = document.getElementById('registerError');
-    
+    try {
+        const connection = await pool.getConnection();
+
+        const [users] = await connection.query(
+            'SELECT * FROM users WHERE email = ?',
+            [email]
+        );
+
+        connection.release();
+
+        if (users.length === 0) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const user = users[0];
+        const validPassword = await bcrypt.compare(password, user.password);
+
+        if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+
+        res.json({
+            token,
+            user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ==================== ADD STUDENT ====================
+
+app.post('/api/students/add', async (req, res) => {
+    const { name, email, password, rollNumber, department, semester } = req.body;
+
     if (!name || !email || !password || !rollNumber || !department) {
-        errorEl.textContent = 'Please fill all fields';
-        return;
+        return res.status(400).json({ message: 'All fields are required' });
     }
-    
+
     try {
-        const response = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password, rollNumber, department })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            errorEl.style.color = '#27ae60';
-            errorEl.textContent = 'Registration successful! Logging in...';
-            setTimeout(() => {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                currentUser = data.user;
-                showMainContent();
-                loadDashboard();
-            }, 1500);
-        } else {
-            errorEl.textContent = data.message || 'Registration failed';
+        const connection = await pool.getConnection();
+
+        const [existingUser] = await connection.query(
+            'SELECT * FROM users WHERE email = ?',
+            [email]
+        );
+
+        if (existingUser.length > 0) {
+            connection.release();
+            return res.status(400).json({ message: 'Email already exists' });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const [userResult] = await connection.query(
+            `INSERT INTO users (name,email,password,role) VALUES (?,?,?,?)`,
+            [name, email, hashedPassword, 'student']
+        );
+
+        const userId = userResult.insertId;
+
+        await connection.query(
+            `INSERT INTO students (user_id,roll_number,department,semester) VALUES (?,?,?,?)`,
+            [userId, rollNumber, department, semester || 1]
+        );
+
+        connection.release();
+
+        res.status(201).json({ message: 'Student added successfully' });
+
     } catch (error) {
-        errorEl.textContent = 'Error connecting to server';
         console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
-}
+});
 
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    currentUser = null;
-    document.getElementById('authSection').style.display = 'flex';
-    document.getElementById('mainContent').style.display = 'none';
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-}
+// ==================== COURSES ====================
 
-function showMainContent() {
-    document.getElementById('authSection').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-}
-
-// Section Navigation
-function showSection(sectionName) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(sectionName + 'Section').classList.add('active');
-    
-    // Load data for the section
-    if (sectionName === 'courses') loadCourses();
-    else if (sectionName === 'attendance') loadAttendance();
-    else if (sectionName === 'grades') loadGrades();
-    else if (sectionName === 'notices') loadNotices();
-}
-
-// Get authorization header
-function getAuthHeader() {
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-    };
-}
-
-// Load Dashboard
-async function loadDashboard() {
+app.get('/api/courses', verifyToken, async (req, res) => {
     try {
-        const token = localStorage.getItem('token');
-        
-        // Fetch all data
-        const [coursesRes, attendanceRes, gradesRes, noticesRes] = await Promise.all([
-            fetch(`${API_URL}/courses`, { headers: getAuthHeader() }),
-            fetch(`${API_URL}/attendance`, { headers: getAuthHeader() }),
-            fetch(`${API_URL}/grades`, { headers: getAuthHeader() }),
-            fetch(`${API_URL}/notices`, { headers: getAuthHeader() })
-        ]);
-        
-        const courses = await coursesRes.json();
-        const attendance = await attendanceRes.json();
-        const grades = await gradesRes.json();
-        const notices = await noticesRes.json();
-        
-        // Update dashboard stats
-        document.getElementById('totalCourses').textContent = courses.length || 0;
-        document.getElementById('totalNotices').textContent = notices.length || 0;
-        
-        // Calculate average attendance
-        if (attendance.length > 0) {
-            const avgAtt = attendance.reduce((sum, item) => sum + item.percentage, 0) / attendance.length;
-            document.getElementById('avgAttendance').textContent = avgAtt.toFixed(1) + '%';
-        }
-        
-        // Calculate GPA
-        if (grades.length > 0) {
-            const totalGpa = grades.reduce((sum, item) => sum + (item.total || 0), 0) / grades.length / 10;
-            document.getElementById('currentGPA').textContent = totalGpa.toFixed(2);
-        }
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-    }
-}
+        const connection = await pool.getConnection();
 
-// Load Courses
-async function loadCourses() {
-    try {
-        const response = await fetch(`${API_URL}/courses`, { headers: getAuthHeader() });
-        const courses = await response.json();
-        
-        const coursesList = document.getElementById('coursesList');
-        coursesList.innerHTML = '';
-        
-        if (courses.length === 0) {
-            coursesList.innerHTML = '<p>No courses enrolled yet.</p>';
-            return;
-        }
-        
-        courses.forEach(course => {
-            const courseCard = document.createElement('div');
-            courseCard.className = 'course-card';
-            courseCard.innerHTML = `
-                <h3>${course.name}</h3>
-                <p><strong>Code:</strong> ${course.code}</p>
-                <p><strong>Instructor:</strong> ${course.instructor}</p>
-                <p><strong>Credits:</strong> ${course.credits}</p>
-                <p><strong>Schedule:</strong> ${course.schedule}</p>
-            `;
-            coursesList.appendChild(courseCard);
-        });
-    } catch (error) {
-        console.error('Error loading courses:', error);
-    }
-}
+        const [courses] = await connection.query(
+            `SELECT c.* FROM courses c
+             JOIN enrollments e ON c.id = e.course_id
+             JOIN students s ON e.student_id = s.id
+             WHERE s.user_id = ?`,
+            [req.userId]
+        );
 
-// Load Attendance
-async function loadAttendance() {
-    try {
-        const response = await fetch(`${API_URL}/attendance`, { headers: getAuthHeader() });
-        const attendance = await response.json();
-        
-        const attendanceList = document.getElementById('attendanceList');
-        attendanceList.innerHTML = '';
-        
-        if (attendance.length === 0) {
-            attendanceList.innerHTML = '<p>No attendance records found.</p>';
-            return;
-        }
-        
-        attendance.forEach(record => {
-            const item = document.createElement('div');
-            item.className = 'attendance-item';
-            const percentage = Math.round(record.percentage);
-            item.innerHTML = `
-                <h3>${record.courseName}</h3>
-                <p>Classes Attended: ${record.present}/${record.total}</p>
-                <div class="attendance-bar">
-                    <div class="attendance-fill" style="width: ${percentage}%"></div>
-                </div>
-                <p style="margin-top: 0.5rem; color: #667eea; font-weight: bold;">${percentage}% Attendance</p>
-            `;
-            attendanceList.appendChild(item);
-        });
-    } catch (error) {
-        console.error('Error loading attendance:', error);
-    }
-}
+        connection.release();
+        res.json(courses);
 
-// Load Grades
-async function loadGrades() {
-    try {
-        const response = await fetch(`${API_URL}/grades`, { headers: getAuthHeader() });
-        const grades = await response.json();
-        
-        const gradesList = document.getElementById('gradesList');
-        gradesList.innerHTML = '';
-        
-        if (grades.length === 0) {
-            gradesList.innerHTML = '<p>No grades available yet.</p>';
-            return;
-        }
-        
-        grades.forEach(grade => {
-            const card = document.createElement('div');
-            card.className = 'grade-card';
-            card.innerHTML = `
-                <h3>${grade.courseName}</h3>
-                <div class="grade-row">
-                    <div class="grade-field">
-                        <span class="grade-label">Assignment:</span>
-                        <span class="grade-value">${grade.assignment}/10</span>
-                    </div>
-                    <div class="grade-field">
-                        <span class="grade-label">Midterm:</span>
-                        <span class="grade-value">${grade.midterm}/20</span>
-                    </div>
-                </div>
-                <div class="grade-row">
-                    <div class="grade-field">
-                        <span class="grade-label">Final:</span>
-                        <span class="grade-value">${grade.final}/50</span>
-                    </div>
-                    <div class="grade-field">
-                        <span class="grade-label">Total:</span>
-                        <span class="grade-value">${grade.total}/100</span>
-                    </div>
-                </div>
-            `;
-            gradesList.appendChild(card);
-        });
     } catch (error) {
-        console.error('Error loading grades:', error);
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
-}
+});
 
-// Load Notices
-async function loadNotices() {
+// ==================== ATTENDANCE ====================
+
+app.get('/api/attendance', verifyToken, async (req, res) => {
     try {
-        const response = await fetch(`${API_URL}/notices`, { headers: getAuthHeader() });
-        const notices = await response.json();
-        
-        const noticesList = document.getElementById('noticesList');
-        noticesList.innerHTML = '';
-        
-        if (notices.length === 0) {
-            noticesList.innerHTML = '<p>No notices available.</p>';
-            return;
-        }
-        
-        notices.forEach(notice => {
-            const card = document.createElement('div');
-            card.className = 'notice-card';
-            const date = new Date(notice.createdAt).toLocaleDateString('en-IN');
-            card.innerHTML = `
-                <h3>${notice.title}</h3>
-                <p class="notice-date">${date}</p>
-                <p class="notice-content">${notice.content}</p>
-            `;
-            noticesList.appendChild(card);
-        });
+        const connection = await pool.getConnection();
+
+        const [attendance] = await connection.query(
+            `SELECT c.name AS courseName, c.id,
+                    COUNT(CASE WHEN a.status='present' THEN 1 END) AS present,
+                    COUNT(*) AS total,
+                    ROUND((COUNT(CASE WHEN a.status='present' THEN 1 END)/COUNT(*))*100) AS percentage
+             FROM attendance a
+             JOIN enrollments e ON a.enrollment_id = e.id
+             JOIN courses c ON e.course_id = c.id
+             JOIN students s ON e.student_id = s.id
+             WHERE s.user_id = ?
+             GROUP BY c.id, c.name`,
+            [req.userId]
+        );
+
+        connection.release();
+        res.json(attendance);
+
     } catch (error) {
-        console.error('Error loading notices:', error);
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
-}
+});
+
+// ==================== GRADES ====================
+
+app.get('/api/grades', verifyToken, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        const [grades] = await connection.query(
+            `SELECT c.name AS courseName, g.*,
+                    (g.assignment + g.midterm + g.final) AS total
+             FROM grades g
+             JOIN enrollments e ON g.enrollment_id = e.id
+             JOIN courses c ON e.course_id = c.id
+             JOIN students s ON e.student_id = s.id
+             WHERE s.user_id = ?`,
+            [req.userId]
+        );
+
+        connection.release();
+        res.json(grades);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ==================== NOTICES ====================
+
+app.get('/api/notices', verifyToken, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        const [notices] = await connection.query(
+            `SELECT * FROM notices ORDER BY created_at DESC LIMIT 20`
+        );
+
+        connection.release();
+        res.json(notices);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ==================== STUDENT PROFILE ====================
+
+app.get('/api/students/profile', verifyToken, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        const [student] =
