@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== MYSQL CONNECTION ====================
 
@@ -249,6 +249,84 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
+// ==================== CHANGE PASSWORD ====================
+
+app.post('/api/auth/change-password', verifyToken, async (req, res) => {
+
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        return res.status(400).json({
+            message: 'All fields are required'
+        });
+    }
+
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({
+            message: 'New passwords do not match'
+        });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({
+            message: 'Password must be at least 8 characters long'
+        });
+    }
+
+    try {
+
+        const connection = await pool.getConnection();
+
+        // Get current user
+        const [users] = await connection.query(
+            'SELECT * FROM users WHERE id = ?',
+            [req.userId]
+        );
+
+        if (users.length === 0) {
+            connection.release();
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        const user = users[0];
+
+        // Verify current password
+        const validPassword = await bcrypt.compare(currentPassword, user.password);
+
+        if (!validPassword) {
+            connection.release();
+            return res.status(401).json({
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update password
+        await connection.query(
+            'UPDATE users SET password = ?, is_password_changed = ? WHERE id = ?',
+            [hashedPassword, true, req.userId]
+        );
+
+        connection.release();
+
+        res.json({
+            message: 'Password changed successfully'
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: 'Server error'
+        });
+    }
+});
+
 // ==================== ADMIN: ADD STUDENT ====================
 
 app.post('/api/admin/students/add', async (req, res) => {
@@ -353,93 +431,67 @@ app.post('/api/admin/students/add', async (req, res) => {
     }
 });
 
-// ==================== CHANGE PASSWORD ====================
+// ==================== STUDENT DASHBOARD ====================
 
-app.post('/api/auth/change-password', verifyToken, async (req, res) => {
-
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-        return res.status(400).json({
-            message: 'All fields are required'
-        });
-    }
-
-    if (newPassword !== confirmPassword) {
-        return res.status(400).json({
-            message: 'New passwords do not match'
-        });
-    }
-
-    if (newPassword.length < 8) {
-        return res.status(400).json({
-            message: 'Password must be at least 8 characters long'
-        });
-    }
-
+app.get('/api/student/dashboard', verifyToken, async (req, res) => {
     try {
-
         const connection = await pool.getConnection();
 
-        // Get current user
-        const [users] = await connection.query(
-            'SELECT * FROM users WHERE id = ?',
+        // Get student info
+        const [student] = await connection.query(
+            `SELECT s.*, u.name, u.email 
+             FROM students s 
+             JOIN users u ON s.user_id = u.id 
+             WHERE u.id = ?`,
             [req.userId]
         );
 
-        if (users.length === 0) {
+        if (student.length === 0) {
             connection.release();
-            return res.status(404).json({
-                message: 'User not found'
-            });
+            return res.status(404).json({ message: 'Student not found' });
         }
 
-        const user = users[0];
+        const studentId = student[0].id;
 
-        // Verify current password
-        const validPassword = await bcrypt.compare(currentPassword, user.password);
-
-        if (!validPassword) {
-            connection.release();
-            return res.status(401).json({
-                message: 'Current password is incorrect'
-            });
-        }
-
-        // Store old password in history
-        await connection.query(
-            'INSERT INTO password_history (user_id, old_password) VALUES (?, ?)',
-            [req.userId, user.password]
+        // Get attendance data
+        const [attendanceData] = await connection.query(
+            `SELECT COUNT(CASE WHEN status='present' THEN 1 END) AS classes_present,
+                    COUNT(*) AS total_classes
+             FROM attendance a
+             JOIN enrollments e ON a.enrollment_id = e.id
+             WHERE e.student_id = ?`,
+            [studentId]
         );
 
-        // Hash new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const attendance = {
+            classes_present: attendanceData[0]?.classes_present || 0,
+            total_classes: attendanceData[0]?.total_classes || 0,
+            attendance_percentage: attendanceData[0]?.total_classes > 0 
+                ? Math.round((attendanceData[0].classes_present / attendanceData[0].total_classes) * 100) 
+                : 0
+        };
 
-        // Update password
-        await connection.query(
-            'UPDATE users SET password = ?, is_password_changed = ? WHERE id = ?',
-            [hashedPassword, true, req.userId]
+        // Get notices
+        const [notices] = await connection.query(
+            'SELECT * FROM notices ORDER BY created_at DESC LIMIT 5'
         );
 
         connection.release();
 
         res.json({
-            message: 'Password changed successfully'
+            student: student[0],
+            attendance,
+            notices
         });
 
     } catch (error) {
-
         console.error(error);
-
-        res.status(500).json({
-            message: 'Server error'
-        });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
 // ==================== COURSES ====================
 
-// GET COURSES
 app.get('/api/courses', verifyToken, async (req, res) => {
 
     try {
@@ -616,7 +668,7 @@ app.get('/api/notices', verifyToken, async (req, res) => {
 
 // ==================== STUDENT PROFILE ====================
 
-app.get('/api/students/profile', verifyToken, async (req, res) => {
+app.get('/api/student/profile', verifyToken, async (req, res) => {
 
     try {
 
@@ -663,7 +715,7 @@ app.get('/api/students/profile', verifyToken, async (req, res) => {
 
 // ==================== UPDATE STUDENT PROFILE ====================
 
-app.put('/api/students/profile', verifyToken, async (req, res) => {
+app.put('/api/student/profile', verifyToken, async (req, res) => {
 
     const {
         phoneNumber,
@@ -726,7 +778,7 @@ app.put('/api/students/profile', verifyToken, async (req, res) => {
 
 // ==================== GET STUDENT BY STUDENT ID ====================
 
-app.get('/api/students/:studentId', verifyToken, async (req, res) => {
+app.get('/api/student/:studentId', verifyToken, async (req, res) => {
 
     try {
 
@@ -767,6 +819,84 @@ app.get('/api/students/:studentId', verifyToken, async (req, res) => {
         res.status(500).json({
             message: 'Server error'
         });
+    }
+});
+
+// ==================== ACADEMIC: SEMESTERS ====================
+
+app.get('/api/academic/semesters', verifyToken, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        const [student] = await connection.query(
+            'SELECT semester FROM students WHERE user_id = ?',
+            [req.userId]
+        );
+
+        if (student.length === 0) {
+            connection.release();
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Generate semesters based on current semester
+        const currentSem = student[0].semester;
+        const semesters = [];
+        for (let i = 1; i <= currentSem; i++) {
+            semesters.push({
+                id: i,
+                semester_number: i,
+                name: `Semester ${i}`
+            });
+        }
+
+        connection.release();
+        res.json(semesters);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ==================== ACADEMIC: SEMESTER SUBJECTS ====================
+
+app.get('/api/academic/semesters/:semesterId/subjects', verifyToken, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        const [subjects] = await connection.query(
+            `SELECT 
+                s.id,
+                s.subject_name,
+                s.subject_code,
+                g.internal_marks,
+                g.external_marks,
+                (g.internal_marks + g.external_marks) AS total_marks,
+                CASE 
+                    WHEN (g.internal_marks + g.external_marks) >= 40 THEN 'PASS'
+                    ELSE 'FAIL'
+                END AS result_status,
+                CASE 
+                    WHEN (g.internal_marks + g.external_marks) >= 90 THEN 'A+'
+                    WHEN (g.internal_marks + g.external_marks) >= 80 THEN 'A'
+                    WHEN (g.internal_marks + g.external_marks) >= 70 THEN 'B+'
+                    WHEN (g.internal_marks + g.external_marks) >= 60 THEN 'B'
+                    WHEN (g.internal_marks + g.external_marks) >= 50 THEN 'C'
+                    ELSE 'F'
+                END AS grade
+             FROM subjects s
+             LEFT JOIN grades g ON s.id = g.subject_id
+             WHERE s.semester = ?
+             LIMIT 10`,
+            [req.params.semesterId]
+        );
+
+        connection.release();
+        res.json(subjects);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
