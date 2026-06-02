@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Utility System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="darkmode.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">🎓 College Utility System</div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showSection('semesters')">Semesters</a></li>
+                <li><a href="#" onclick="showSection('profile')">Profile</a></li>
+                <li><a href="#" onclick="showSection('attendance')">Attendance</a></li>
+                <li>
+                    <button class="theme-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+                </li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Auth Section -->
+    <div id="authSection" class="auth-container">
+        <div class="auth-box">
+            <h1>🎓 College Utility System</h1>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h2>Student Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button onclick="login()">Login</button>
+                <p id="loginError" class="error-message"></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <h2>Student Registration</h2>
+                <input type="text" id="registerName" placeholder="Full Name" required>
+                <input type="email" id="registerEmail" placeholder="Email" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <input type="text" id="registerRoll" placeholder="Roll Number" required>
+                <select id="registerDept" required>
+                    <option value="">Select Department</option>
+                    <option value="CSE">Computer Science</option>
+                    <option value="ECE">Electronics</option>
+                    <option value="ME">Mechanical</option>
+                    <option value="CE">Civil</option>
+                </select>
+                <input type="tel" id="registerPhone" placeholder="Phone Number (optional)">
+                <button onclick="register()">Register</button>
+                <p id="registerError" class="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="main-layout" style="display: none;">
+        <!-- Profile Sidebar -->
+        <aside class="profile-sidebar">
+            <div class="profile-card">
+                <div class="profile-photo-container">
+                    <img id="profilePhotoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect fill='%23FF8C00' width='200' height='200'/%3E%3Ctext x='100' y='100' font-size='80' fill='white' text-anchor='middle' dominant-baseline='middle'%3E👤%3C/text%3E%3C/svg%3E" alt="Profile Photo" class="profile-photo">
+                    <label for="photoUpload" class="photo-upload-btn">📷</label>
+                    <input type="file" id="photoUpload" style="display: none;" accept="image/*">
+                </div>
+                <h3 id="profileName">Student Name</h3>
+                <div class="profile-info">
+                    <div class="info-item">
+                        <span class="info-label">Roll Number:</span>
+                        <span class="info-value" id="profileRoll">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Registration:</span>
+                        <span class="info-value" id="profileReg">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Department:</span>
+                        <span class="info-value" id="profileDept">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Semester:</span>
+                        <span class="info-value" id="profileSem">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="profileEmail">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value" id="profilePhone">-</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="showSection('profile')">Edit Profile</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content-area">
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="section active">
+                <div class="section-header">
+                    <h2>📊 Dashboard</h2>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Overall CGPA</h3>
+                        <p class="stat-value" id="cgpaValue">0.0</p>
+                        <p class="stat-label">Cumulative GPA</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Credits Earned</h3>
+                        <p class="stat-value" id="creditsValue">0</p>
+                        <p class="stat-label">Total Credits</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Attendance</h3>
+                        <p class="stat-value" id="attendanceValue">0%</p>
+                        <p class="stat-label">Overall %</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Semester</h3>
+                        <p class="stat-value" id="semesterValue">1</p>
+                        <p class="stat-label">Current</p>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Semester Performance</h3>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Attendance Trend</h3>
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Notices -->
+                <div class="notices-section">
+                    <h3>📢 Recent Announcements</h3>
+                    <div id="recentNotices" class="notices-list"></div>
+                </div>
+            </section>
+
+            <!-- Semesters Section -->
+            <section id="semestersSection" class="section">
+                <div class="section-header">
+                    <h2>📚 Semester Records</h2>
+                </div>
+                
+                <div class="semester-tabs" id="semesterTabs"></div>
+                <div class="semester-content" id="semesterContent"></div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profileSection" class="section">
+                <div class="section-header">
+                    <h2>👤 My Profile</h2>
+                </div>
+                
+                <div class="profile-form-container">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="editName" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="editEmail" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Roll Number</label>
+                        <input type="text" id="editRoll" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" id="editDept" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="editPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="editDOB">
+                    </div>
+                    <div class="form-group">
+                        <label>Guardian Name</label>
+                        <input type="text" id="editGuardian">
+                    </div>
+                    <div class="form-group">
+                        <label>Guardian Phone</label>
+                        <input type="tel" id="editGuardianPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea id="editAddress" rows="3"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="updateProfile()">Save Changes</button>
+                </div>
+            </section>
+
+            <!-- Attendance Section -->
+            <section id="attendanceSection" class="section">
+                <div class="section-header">
+                    <h2>✅ Attendance</h2>
+                </div>
+                
+                <div id="attendanceList" class="attendance-container"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

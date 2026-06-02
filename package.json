@@ -1,7 +1,7 @@
 {
   "name": "college-utility-system",
-  "version": "1.0.0",
-  "description": "A comprehensive college utility system with student dashboard, attendance, grades, and notices",
+  "version": "2.0.0",
+  "description": "A comprehensive college utility system with modern student dashboard, semester records, attendance, grades, and academic analytics",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -13,7 +13,9 @@
     "student",
     "dashboard",
     "attendance",
-    "grades"
+    "grades",
+    "semester",
+    "academic"
   ],
   "author": "Your Name",
   "license": "MIT",
@@ -23,7 +25,10 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.1.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "pdfkit": "^0.13.0",
+    "multer": "^1.4.5-lts.1",
+    "body-parser": "^1.20.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
