@@ -9,17 +9,26 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('student', 'faculty', 'admin') DEFAULT 'student',
+    is_password_changed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Students Table
+-- Students Table (ENHANCED)
 CREATE TABLE IF NOT EXISTS students (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    student_id VARCHAR(50) UNIQUE NOT NULL,
     roll_number VARCHAR(50) UNIQUE NOT NULL,
     department VARCHAR(50) NOT NULL,
     semester INT DEFAULT 1,
+    phone_number VARCHAR(15),
+    date_of_birth DATE,
+    address TEXT,
+    guardian_name VARCHAR(100),
+    guardian_phone VARCHAR(15),
+    cgpa DECIMAL(3, 2) DEFAULT 0.00,
+    status ENUM('active', 'inactive', 'graduated') DEFAULT 'active',
     enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -81,14 +90,23 @@ CREATE TABLE IF NOT EXISTS notices (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Sample Data
-INSERT INTO users (name, email, password, role) VALUES
-('Admin User', 'admin@college.com', '$2a$10$abcdefghijklmnopqrstuvwxyz', 'admin'),
-('Dr. John Smith', 'john.smith@college.com', '$2a$10$abcdefghijklmnopqrstuvwxyz', 'faculty'),
-('Priya Sharma', 'priya.sharma@college.com', '$2a$10$abcdefghijklmnopqrstuvwxyz', 'student');
+-- Password History Table (NEW)
+CREATE TABLE IF NOT EXISTS password_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    old_password VARCHAR(255) NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
-INSERT INTO students (user_id, roll_number, department, semester) VALUES
-(3, '2024001', 'CSE', 2);
+-- Sample Data
+INSERT INTO users (name, email, password, role, is_password_changed) VALUES
+('Admin User', 'admin@college.com', '$2a$10$abcdefghijklmnopqrstuvwxyz', 'admin', TRUE),
+('Dr. John Smith', 'john.smith@college.com', '$2a$10$abcdefghijklmnopqrstuvwxyz', 'faculty', TRUE),
+('Priya Sharma', 'priya.sharma@college.com', '$2a$10$abcdefghijklmnopqrstuvwxyz', 'student', FALSE);
+
+INSERT INTO students (user_id, student_id, roll_number, department, semester, phone_number, date_of_birth, guardian_name, cgpa, status) VALUES
+(3, 'STUCSE2024001', '2024001', 'CSE', 2, '9876543210', '2005-06-15', 'Raj Sharma', 3.85, 'active');
 
 INSERT INTO courses (name, code, instructor, credits, schedule, description) VALUES
 ('Data Structures', 'CS101', 'Dr. John Smith', 4, 'Mon, Wed, Fri 10:00-11:00 AM', 'Introduction to data structures and algorithms'),
@@ -136,6 +154,8 @@ INSERT INTO notices (title, content, category) VALUES
 -- Create Indexes for better performance
 CREATE INDEX idx_user_email ON users(email);
 CREATE INDEX idx_student_user ON students(user_id);
+CREATE INDEX idx_student_id ON students(student_id);
+CREATE INDEX idx_student_status ON students(status);
 CREATE INDEX idx_enrollment_student ON enrollments(student_id);
 CREATE INDEX idx_enrollment_course ON enrollments(course_id);
 CREATE INDEX idx_attendance_enrollment ON attendance(enrollment_id);
