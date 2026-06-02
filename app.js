@@ -297,8 +297,36 @@ app.get('/api/notices', verifyToken, async (req, res) => {
 
 // ==================== STUDENT PROFILE ====================
 
+
 app.get('/api/students/profile', verifyToken, async (req, res) => {
     try {
         const connection = await pool.getConnection();
 
-        const [student] =
+        const [student] = await connection.query(
+            `SELECT u.id AS userId, u.name, u.email, u.role,
+                    s.id AS studentId, s.roll_number, s.department, s.semester
+             FROM users u
+             JOIN students s ON u.id = s.user_id
+             WHERE u.id = ?`,
+            [req.userId]
+        );
+
+        connection.release();
+
+        if (student.length === 0) {
+            return res.status(404).json({ message: 'Student profile not found' });
+        }
+
+        res.json(student[0]);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// ==================== START SERVER ====================
+
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
